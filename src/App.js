@@ -54,9 +54,28 @@ class App extends Component {
       imageURL: "",
       box: {},
       route: "signIn", // Default route is set to "signIn"
-      isSignedIn: false, // Flag indicating whether the user is signed in
+      isSignedIn: false, // Flag indicating whether the user is signed In
+      user: {
+        id: "",
+        name: "",
+        email: "",
+        entries: 0,
+        joined: "",
+      }, // User object containing details of logged in user
     };
   }
+
+  loadUser = (data) => {
+    this.setState({
+      user: {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        entries: data.entries,
+        joined: data.joined,
+      },
+    });
+  };
 
   // Function to calculate the face location based on Clarifai API response
   calculateFaceLocation = (data) => {
@@ -92,7 +111,24 @@ class App extends Component {
       returnClarifyRequestOptions(this.state.input)
     )
       .then((response) => response.json())
-      .then((result) => this.displayFaceBox(this.calculateFaceLocation(result)))
+      .then((result) => {
+        if (result) {
+          fetch("http://localhost:3000/image", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: this.state.user.id,
+            }),
+          })
+            .then((response) => response.json())
+            .then((count) => {
+              this.setState(Object.assign(this.state.user, { entries: count }));
+            });
+        }
+        this.displayFaceBox(this.calculateFaceLocation(result));
+      })
       .catch((err) => console.log(err));
   };
 
@@ -124,7 +160,10 @@ class App extends Component {
             <div>
               {/* Logo, Rank, ImageLinkForm, and FaceRecognition components */}
               <Logo />
-              <Rank />
+              <Rank
+                name={this.state.user.name}
+                entries={this.state.user.entries}
+              />
               <ImageLinkForm
                 onInputChange={this.onInputChange}
                 onButtonSubmit={this.onButtonSubmit}
@@ -136,10 +175,16 @@ class App extends Component {
             </div>
           ) : this.state.route === "signIn" ? (
             // SignIn component
-            <SignIn onRouteChange={this.onRouteChange} />
+            <SignIn
+              loadUser={this.loadUser}
+              onRouteChange={this.onRouteChange}
+            />
           ) : (
             // Register component
-            <Register onRouteChange={this.onRouteChange} />
+            <Register
+              loadUser={this.loadUser}
+              onRouteChange={this.onRouteChange}
+            />
           )}
         </div>
       </>
