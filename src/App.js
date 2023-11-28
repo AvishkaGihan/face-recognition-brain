@@ -1,7 +1,6 @@
+// Importing necessary dependencies and components
 import React, { Component } from "react";
-
 import "./App.css";
-
 import ParticlesBg from "particles-bg";
 import Navigation from "./Components/Navigation/Navigation";
 import SignIn from "./Components/SignIn/SignIn";
@@ -11,6 +10,7 @@ import Rank from "./Components/Rank/Rank";
 import ImageLinkForm from "./Components/ImageLinkForm/ImageLinkForm";
 import FaceRecognition from "./Components/FaceRecognition/FaceRecognition";
 
+// Function to construct request options for Clarifai API
 const returnClarifyRequestOptions = (imageURL) => {
   const PAT = "5a31d47de34b4535a34c9c2268340b71";
   const USER_ID = "x0fl1quggb5n";
@@ -44,18 +44,21 @@ const returnClarifyRequestOptions = (imageURL) => {
   return requestOptions;
 };
 
+// Main App component
 class App extends Component {
+  // Constructor to initialize the state
   constructor() {
     super();
     this.state = {
       input: "",
       imageURL: "",
       box: {},
-      route: "signIn",
-      isSignedIn: false,
+      route: "signIn", // Default route is set to "signIn"
+      isSignedIn: false, // Flag indicating whether the user is signed in
     };
   }
 
+  // Function to calculate the face location based on Clarifai API response
   calculateFaceLocation = (data) => {
     const clarifaiFace =
       data.outputs[0].data.regions[0].region_info.bounding_box;
@@ -71,14 +74,17 @@ class App extends Component {
     };
   };
 
+  // Function to update the state with the calculated face box
   displayFaceBox = (box) => {
     this.setState({ box: box });
   };
 
+  // Event handler for input change
   onInputChange = (event) => {
     this.setState({ input: event.target.value });
   };
 
+  // Event handler for button click to submit the image for face detection
   onButtonSubmit = () => {
     this.setState({ imageURL: this.state.input });
     fetch(
@@ -90,7 +96,9 @@ class App extends Component {
       .catch((err) => console.log(err));
   };
 
+  // Event handler for route change
   onRouteChange = (route) => {
+    // Update state based on the new route
     if (route === "signOut") {
       this.setState({ isSignedIn: false });
     } else if (route === "home") {
@@ -99,32 +107,38 @@ class App extends Component {
     this.setState({ route: route });
   };
 
+  // Render method for rendering the component
   render() {
     return (
       <>
+        {/* Particle background */}
         <ParticlesBg type="cobweb" num={120} color="#000000" bg={true} />
         <div className="App">
+          {/* Navigation component */}
           <Navigation
             isSignedIn={this.state.isSignedIn}
             onRouteChange={this.onRouteChange}
           />
+          {/* Conditional rendering based on the current route */}
           {this.state.route === "home" ? (
             <div>
+              {/* Logo, Rank, ImageLinkForm, and FaceRecognition components */}
               <Logo />
               <Rank />
               <ImageLinkForm
                 onInputChange={this.onInputChange}
                 onButtonSubmit={this.onButtonSubmit}
               />
-
               <FaceRecognition
                 box={this.state.box}
                 imageUrl={this.state.imageURL}
               />
             </div>
           ) : this.state.route === "signIn" ? (
+            // SignIn component
             <SignIn onRouteChange={this.onRouteChange} />
           ) : (
+            // Register component
             <Register onRouteChange={this.onRouteChange} />
           )}
         </div>
@@ -133,4 +147,5 @@ class App extends Component {
   }
 }
 
+// Exporting the App component
 export default App;
