@@ -44,6 +44,21 @@ const returnClarifyRequestOptions = (imageURL) => {
   return requestOptions;
 };
 
+const initialState = {
+  input: "",
+  imageURL: "",
+  box: {},
+  route: "signIn", // Default route is set to "signIn"
+  isSignedIn: false, // Flag indicating whether the user is signed In
+  user: {
+    id: "",
+    name: "",
+    email: "",
+    entries: 0,
+    joined: "",
+  },
+};
+
 // Main App component
 class App extends Component {
   // Constructor to initialize the state
@@ -125,7 +140,8 @@ class App extends Component {
             .then((response) => response.json())
             .then((count) => {
               this.setState(Object.assign(this.state.user, { entries: count }));
-            });
+            })
+            .catch(console.log);
         }
         this.displayFaceBox(this.calculateFaceLocation(result));
       })
@@ -136,7 +152,7 @@ class App extends Component {
   onRouteChange = (route) => {
     // Update state based on the new route
     if (route === "signOut") {
-      this.setState({ isSignedIn: false });
+      this.setState(initialState);
     } else if (route === "home") {
       this.setState({ isSignedIn: true });
     }
