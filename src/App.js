@@ -10,40 +10,6 @@ import Rank from "./Components/Rank/Rank";
 import ImageLinkForm from "./Components/ImageLinkForm/ImageLinkForm";
 import FaceRecognition from "./Components/FaceRecognition/FaceRecognition";
 
-// Function to construct request options for Clarifai API
-const returnClarifyRequestOptions = (imageURL) => {
-  const PAT = "5a31d47de34b4535a34c9c2268340b71";
-  const USER_ID = "x0fl1quggb5n";
-  const APP_ID = "my-first-application";
-  const IMAGE_URL = imageURL;
-
-  const raw = JSON.stringify({
-    user_app_id: {
-      user_id: USER_ID,
-      app_id: APP_ID,
-    },
-    inputs: [
-      {
-        data: {
-          image: {
-            url: IMAGE_URL,
-          },
-        },
-      },
-    ],
-  });
-
-  const requestOptions = {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      Authorization: "Key " + PAT,
-    },
-    body: raw,
-  };
-  return requestOptions;
-};
-
 const initialState = {
   input: "",
   imageURL: "",
@@ -121,18 +87,20 @@ class App extends Component {
   // Event handler for button click to submit the image for face detection
   onButtonSubmit = () => {
     this.setState({ imageURL: this.state.input });
-    fetch(
-      "https://api.clarifai.com/v2/models/face-detection/outputs",
-      returnClarifyRequestOptions(this.state.input)
-    )
+
+    fetch("http://localhost:3000/imageUrl", {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        input: this.state.input,
+      }),
+    })
       .then((response) => response.json())
-      .then((result) => {
-        if (result) {
+      .then((response) => {
+        if (response) {
           fetch("http://localhost:3000/image", {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            method: "put",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               id: this.state.user.id,
             }),
@@ -143,7 +111,7 @@ class App extends Component {
             })
             .catch(console.log);
         }
-        this.displayFaceBox(this.calculateFaceLocation(result));
+        this.displayFaceBox(this.calculateFaceLocation(response));
       })
       .catch((err) => console.log(err));
   };
