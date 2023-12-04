@@ -32,6 +32,3 @@ To run this project locally, you need to have Node.js and PostgreSQL installed o
 
 To use the app, you can either register a new account or sign in with an existing account. You can then enter an image URL in the input box and click on the Detect button. The app will display the image and draw a box around each face. It will also update your entry count.
 
-## License
-
-This project is licensed under the MIT License. See the [LICENSE] file for details.
